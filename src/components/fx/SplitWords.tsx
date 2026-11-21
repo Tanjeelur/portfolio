@@ -20,7 +20,8 @@ function words(text: string, className: string | undefined, keyBase: string) {
 }
 
 function split(node: ReactNode, key = "w"): ReactNode[] {
-  return Children.toArray(node).flatMap((child, ci) => {
+  // Explicit ReactNode[] return so the word arrays and the pass-through child unify
+  return Children.toArray(node).flatMap((child, ci): ReactNode[] => {
     const k = `${key}-${ci}`;
     if (typeof child === "string") return words(child, undefined, k);
     if (isValidElement(child)) {
