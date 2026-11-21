@@ -33,7 +33,8 @@ export default function BootScreen() {
     const start = performance.now();
     let raf = 0;
     const tick = (now: number) => {
-      const p = Math.min(1, (now - start) / 700);
+      // rAF timestamps can be slightly earlier than `start`, so clamp to 0..1
+      const p = Math.max(0, Math.min(1, (now - start) / 700));
       setPct(Math.round(p * 100));
       if (p < 1) raf = requestAnimationFrame(tick);
     };
@@ -62,7 +63,8 @@ export default function BootScreen() {
 
   if (gone) return null;
 
-  const bar = "█".repeat(Math.round(pct / 10)).padEnd(10, "░");
+  const filled = Math.max(0, Math.min(10, Math.round(pct / 10)));
+  const bar = "█".repeat(filled).padEnd(10, "░");
 
   return (
     <div

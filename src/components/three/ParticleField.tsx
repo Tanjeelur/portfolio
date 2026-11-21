@@ -145,7 +145,8 @@ const fragmentShader = /* glsl */ `
 `;
 
 export default function ParticleField({ count, reducedMotion }: { count: number; reducedMotion: boolean }) {
-  const { viewport, gl } = useThree();
+  const { viewport, gl, size } = useThree();
+  const textBox = useRef({ h: 1.5, mid: 0 });
   const pointsRef = useRef<THREE.Points>(null);
   const intro = useRef({ v: reducedMotion ? 1 : 0 });
   const morph = useRef(0);
@@ -157,7 +158,16 @@ export default function ParticleField({ count, reducedMotion }: { count: number;
     const rnd = new Float32Array(count);
     for (let i = 0; i < count; i++) rnd[i] = Math.random();
     g.setAttribute("position", new THREE.BufferAttribute(noiseCloud(count), 3));
-    g.setAttribute("aText", new THREE.BufferAttribute(textPoints(profile.shortName, count, 0), 3));
+    const txt = textPoints(profile.shortName, count, 0);
+    // Bounding box of the sampled name, used to fit it into the free space above the hero copy
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (let i = 1; i < txt.length; i += 3) {
+      minY = Math.min(minY, txt[i]);
+      maxY = Math.max(maxY, txt[i]);
+    }
+    textBox.current = { h: maxY - minY, mid: (maxY + minY) / 2 };
+    g.setAttribute("aText", new THREE.BufferAttribute(txt, 3));
     g.setAttribute("aNet", new THREE.BufferAttribute(net.pos, 3));
     g.setAttribute("aSignal", new THREE.BufferAttribute(net.signal, 2));
     g.setAttribute("aGalaxy", new THREE.BufferAttribute(galaxy(count), 3));
@@ -230,9 +240,14 @@ export default function ParticleField({ count, reducedMotion }: { count: number;
     const u = material.uniforms;
     u.uTime.value = state.clock.elapsedTime;
     u.uPixelRatio.value = gl.getPixelRatio();
-    u.uFit.value = Math.min(1, (viewport.width * 0.88) / 10, (viewport.height * 0.2) / 1.5);
+    // Fit the name inside the measured band above the hero copy (falls back to a fixed slot)
+    const pxToWorld = viewport.height / size.height;
+    const band = scrollState.heroBottom > scrollState.heroTop ? scrollState.heroBottom - scrollState.heroTop : size.height * 0.3;
+    const bandCenter = scrollState.heroBottom > scrollState.heroTop ? (scrollState.heroTop + scrollState.heroBottom) / 2 : size.height * 0.25;
+    const maxByHeight = (band * pxToWorld * 0.8) / Math.max(0.01, textBox.current.h);
+    u.uFit.value = Math.min(1, (viewport.width * 0.88) / 10, maxByHeight);
     // Keep the particle name in the upper part of the hero, clear of the HTML copy
-    u.uTextY.value = viewport.height * 0.25;
+    u.uTextY.value = (size.height / 2 - bandCenter) * pxToWorld - textBox.current.mid * u.uFit.value;
     // On wide screens, shrink the network and park it on the right so the About copy stays
     // clear; on narrow screens keep it centred but much dimmer behind the text.
     const wide = viewport.width > 12;

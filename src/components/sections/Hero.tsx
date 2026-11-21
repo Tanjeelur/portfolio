@@ -7,7 +7,7 @@ export default function Hero() {
       className="relative flex min-h-svh flex-col items-center justify-end px-4 pb-16 text-center sm:px-6 sm:pb-20"
     >
       {/* The particle name renders in the WebGL canvas behind this. */}
-      <div className="max-w-2xl">
+      <div id="hero-copy" className="max-w-2xl">
         <p className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-cyan">
           {profile.role}
         </p>
@@ -34,7 +34,8 @@ export default function Hero() {
           </a>
         </div>
       </div>
-      <div className="mt-14 flex flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted">
+      {/* tighter on short screens so the particle name above gets more room */}
+      <div className="mt-14 flex flex-col items-center gap-2 font-mono [@media(max-height:780px)]:mt-6 [@media(max-height:680px)]:hidden text-[10px] uppercase tracking-[0.3em] text-muted">
         scroll
         <span className="h-10 w-px animate-pulse bg-gradient-to-b from-cyan to-transparent" />
       </div>

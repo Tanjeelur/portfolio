@@ -39,15 +39,15 @@ export default function Cursor() {
         visible = true;
         ringPos.x = pos.x;
         ringPos.y = pos.y;
-        dot.current!.style.opacity = "1";
-        ring.current!.style.opacity = "1";
+        if (dot.current) dot.current.style.opacity = "1";
+        if (ring.current) ring.current.style.opacity = "1";
       }
 
       const target = e.target as HTMLElement | null;
       const interactive = target?.closest<HTMLElement>("a, button, [role=tab], input, label, [data-cursor]");
       const text = interactive?.closest<HTMLElement>("[data-cursor]")?.dataset.cursor ?? "";
       const pointerOnCanvas = document.body.style.cursor === "pointer"; // set by the 3D galaxy on hover
-      label.current!.textContent = text || (pointerOnCanvas ? "open" : "");
+      if (label.current) label.current.textContent = text || (pointerOnCanvas ? "open" : "");
       targetScale = text || pointerOnCanvas ? 3.2 : interactive ? 1.9 : 1;
 
       // Magnetic elements
@@ -63,8 +63,8 @@ export default function Cursor() {
     };
     const onLeave = () => {
       visible = false;
-      dot.current!.style.opacity = "0";
-      ring.current!.style.opacity = "0";
+      if (dot.current) dot.current.style.opacity = "0";
+      if (ring.current) ring.current.style.opacity = "0";
       releaseMagnet();
     };
     const onDown = () => (targetScale *= 0.8);
@@ -74,9 +74,15 @@ export default function Cursor() {
       ringPos.x += (pos.x - ringPos.x) * 0.18;
       ringPos.y += (pos.y - ringPos.y) * 0.18;
       scale += (targetScale - scale) * 0.18;
-      dot.current!.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0) translate(-50%, -50%)`;
-      ring.current!.style.transform = `translate3d(${ringPos.x}px, ${ringPos.y}px, 0) translate(-50%, -50%) scale(${scale})`;
-      label.current!.style.transform = `scale(${1 / scale})`;
+      // Elements can be briefly missing while React rebuilds the tree: skip the frame, don't crash
+      const d = dot.current;
+      const r = ring.current;
+      const l = label.current;
+      if (d && r && l) {
+        d.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0) translate(-50%, -50%)`;
+        r.style.transform = `translate3d(${ringPos.x}px, ${ringPos.y}px, 0) translate(-50%, -50%) scale(${scale})`;
+        l.style.transform = `scale(${1 / scale})`;
+      }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);

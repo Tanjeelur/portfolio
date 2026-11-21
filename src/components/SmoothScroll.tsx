@@ -19,10 +19,18 @@ export default function SmoothScroll() {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // The particle name sits between the nav (top, desktop only) and the hero copy
+    const measureHero = () => {
+      const copy = document.getElementById("hero-copy");
+      if (!copy) return;
+      scrollState.heroTop = window.innerWidth >= 768 ? 76 : 20;
+      scrollState.heroBottom = copy.getBoundingClientRect().top + window.scrollY - 16;
+    };
     const sections = SECTION_IDS.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
     const updateScroll = () => {
       scrollState.y = window.scrollY;
       scrollState.vh = window.innerHeight;
+      measureHero();
       // Active section = last one whose top has passed the middle of the viewport
       let current = "top";
       for (const s of sections) if (s.getBoundingClientRect().top <= window.innerHeight * 0.5) current = s.id;
@@ -132,6 +140,7 @@ export default function SmoothScroll() {
     // recompute trigger positions whenever the document resizes.
     let refreshTimer: ReturnType<typeof setTimeout> | undefined;
     const ro = new ResizeObserver(() => {
+      measureHero();
       clearTimeout(refreshTimer);
       refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 150);
     });

@@ -70,11 +70,11 @@ export default function TrainingRun() {
       const p = Math.min(1, Math.max(0.02, -r.top / Math.max(1, total)));
       lp.style.strokeDashoffset = `${lLen * (1 - p)}`;
       ap.style.strokeDashoffset = `${aLen * (1 - p)}`;
-      headLoss.current!.setAttribute("cx", `${sx(p)}`);
-      headLoss.current!.setAttribute("cy", `${sy(loss(p))}`);
-      headAcc.current!.setAttribute("cx", `${sx(p)}`);
-      headAcc.current!.setAttribute("cy", `${sy(acc(p))}`);
-      readout.current!.textContent = `epoch ${(p * 3).toFixed(2)} · loss ${loss(p).toFixed(3)} · val_acc ${acc(p).toFixed(3)}`;
+      headLoss.current?.setAttribute("cx", `${sx(p)}`);
+      headLoss.current?.setAttribute("cy", `${sy(loss(p))}`);
+      headAcc.current?.setAttribute("cx", `${sx(p)}`);
+      headAcc.current?.setAttribute("cy", `${sy(acc(p))}`);
+      if (readout.current) readout.current.textContent = `epoch ${(p * 3).toFixed(2)} · loss ${loss(p).toFixed(3)} · val_acc ${acc(p).toFixed(3)}`;
       let idx = 0;
       CHECKPOINTS.forEach((c, i) => {
         if (p >= c) idx = i;

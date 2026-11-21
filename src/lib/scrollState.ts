@@ -6,6 +6,9 @@ export const scrollState = {
   vh: 1,
   /** id of the section currently in the middle of the viewport */
   section: "top",
+  /** Free band (px from page top) above the hero copy where the particle name is placed */
+  heroTop: 0,
+  heroBottom: 0,
 };
 
 /** Section ids in page order (used by the nav and the particle palette). */
